@@ -1,25 +1,43 @@
+// Import Express
 const express = require("express");
 const path = require("path");
+const bodyParser = require("body-parser");
+
+// Initialize app
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: true }));
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 
+// Simple in-memory storage for blog posts
 let posts = [];
 
+// 🏠 Serve homepage
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// ✏️ Add a new post
 app.post("/add-post", (req, res) => {
   const { title, content } = req.body;
-  posts.push({ title, content });
+
+  if (title && content) {
+    posts.unshift({ title, content }); // add new posts to the top
+  }
+
   res.redirect("/");
 });
 
+// 📜 Get all posts (for frontend)
 app.get("/posts", (req, res) => {
   res.json(posts);
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// 🌐 Dynamic PORT for Render
+const PORT = process.env.PORT || 3000;
+
+// ✅ Start server
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
